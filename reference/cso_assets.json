@@ -1,0 +1,103 @@
+{
+  "timezone": "Asia/Shanghai",
+  "roles": ["调度员", "运维人员", "监管人员", "只读用户"],
+  "eventIdExample": "event-0001",
+  "parameters": {
+    "horizon_seconds": 3600,
+    "storm_gap_minutes": 120,
+    "sensor_stale_multiplier": 3,
+    "gate_conflict_tolerance_percent": 5,
+    "level_conflict_tolerance_m": 0.1,
+    "quality_conflict_tolerance_mg_l": 5,
+    "assumed_combined_sewage_quality_mg_l": 70,
+    "notify_sla_minutes": {"orange": 30, "red": 15},
+    "impact_km_by_level": {"blue": 1, "yellow": 2, "orange": 4, "red": 8},
+    "impact_spill_m3_per_km": 4000,
+    "impact_max_km": 10
+  },
+  "warning_levels": [
+    {"level": "blue", "rain_1h_mm_gte": 5, "name_cn": "蓝色"},
+    {"level": "yellow", "rain_1h_mm_gte": 10, "name_cn": "黄色"},
+    {"level": "orange", "rain_1h_mm_gte": 20, "name_cn": "橙色"},
+    {"level": "red", "rain_1h_mm_gte": 40, "name_cn": "红色"}
+  ],
+  "thresholds": {
+    "cso_pollution_mg_l": 50,
+    "description_cn": "合流制溢流口允许入河的污染浓度上限与河道水位限制"
+  },
+  "river_reaches": [
+    {"id": "R1", "name_cn": "城东河", "limit_level_m": 3.2, "backwater_level_m": 3.5},
+    {"id": "R2", "name_cn": "城西河", "limit_level_m": 3.0, "backwater_level_m": 3.3}
+  ],
+  "zones": [
+    {
+      "id": "Z1",
+      "name_cn": "东圩区",
+      "catchment_area_m2": 1200000,
+      "runoff_coefficient": 0.75,
+      "storage_capacity_m3": 18000,
+      "outlets": [
+        {"id": "CSO-1", "name_cn": "1号合流制溢流口", "gate_id": "G1", "river_reach_id": "R1", "river_km": 12.5}
+      ],
+      "gates": [
+        {"id": "G1", "name_cn": "1号溢流闸", "capacity_m3_s": 3.0}
+      ],
+      "pumps": [
+        {"id": "P1", "name_cn": "1号提升泵", "capacity_m3_s": 1.5, "destination_cn": "污水处理厂"}
+      ]
+    },
+    {
+      "id": "Z2",
+      "name_cn": "西圩区",
+      "catchment_area_m2": 800000,
+      "runoff_coefficient": 0.8,
+      "storage_capacity_m3": 12000,
+      "outlets": [
+        {"id": "CSO-2", "name_cn": "2号合流制溢流口", "gate_id": "G2", "river_reach_id": "R2", "river_km": 5.0}
+      ],
+      "gates": [
+        {"id": "G2", "name_cn": "2号溢流闸", "capacity_m3_s": 2.0}
+      ],
+      "pumps": [
+        {"id": "P2", "name_cn": "2号提升泵", "capacity_m3_s": 0.9, "destination_cn": "污水处理厂"}
+      ]
+    }
+  ],
+  "stations": [
+    {"id": "rain-east", "name_cn": "城东雨量站", "kind": "rainfall", "zone_id": "Z1", "interval_s": 60, "unit": "mm/帧"},
+    {"id": "rain-west", "name_cn": "城西雨量站", "kind": "rainfall", "zone_id": "Z2", "interval_s": 60, "unit": "mm/帧"},
+    {"id": "lvl-east-well", "name_cn": "东圩泵站集水井液位", "kind": "level", "zone_id": "Z1", "interval_s": 60, "unit": "m", "level_full_m": 4.0},
+    {"id": "lvl-west-well", "name_cn": "西圩泵站集水井液位", "kind": "level", "zone_id": "Z2", "interval_s": 60, "unit": "m", "level_full_m": 3.6},
+    {"id": "river-east", "name_cn": "城东河水位站", "kind": "river_level", "zone_id": "Z1", "river_reach_id": "R1", "interval_s": 120, "unit": "m"},
+    {"id": "river-west", "name_cn": "城西河水位站", "kind": "river_level", "zone_id": "Z2", "river_reach_id": "R2", "interval_s": 120, "unit": "m"},
+    {"id": "qual-east", "name_cn": "东圩水质站", "kind": "quality", "zone_id": "Z1", "interval_s": 120, "unit": "mg/L"},
+    {"id": "qual-west", "name_cn": "西圩水质站", "kind": "quality", "zone_id": "Z2", "interval_s": 120, "unit": "mg/L"}
+  ],
+  "storm_samples": [
+    {
+      "id": "sample-typhoon-cross-midnight",
+      "description_cn": "台风残余螺旋雨带，23:10 起雨，持续跨午夜；03:25 的回波与前一峰间隔 165 分钟，应另开事件",
+      "zone_id": "Z1",
+      "station_id": "rain-east",
+      "messages": [
+        {"observed_at": "2025-08-22T23:10:00+08:00", "rain_mm": 8.0},
+        {"observed_at": "2025-08-22T23:40:00+08:00", "rain_mm": 14.0},
+        {"observed_at": "2025-08-22T23:55:00+08:00", "rain_mm": 18.0},
+        {"observed_at": "2025-08-23T00:10:00+08:00", "rain_mm": 16.0},
+        {"observed_at": "2025-08-23T00:40:00+08:00", "rain_mm": 9.0},
+        {"observed_at": "2025-08-23T03:25:00+08:00", "rain_mm": 6.0}
+      ]
+    },
+    {
+      "id": "sample-afternoon-thunderstorm",
+      "description_cn": "夏季午后热雷雨，30 分钟内结束",
+      "zone_id": "Z2",
+      "station_id": "rain-west",
+      "messages": [
+        {"observed_at": "2025-06-18T14:05:00+08:00", "rain_mm": 6.0},
+        {"observed_at": "2025-06-18T14:20:00+08:00", "rain_mm": 12.0},
+        {"observed_at": "2025-06-18T14:35:00+08:00", "rain_mm": 9.0}
+      ]
+    }
+  ]
+}

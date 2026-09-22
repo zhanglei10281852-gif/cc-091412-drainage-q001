@@ -1,33 +1,8 @@
-import json
-import os
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+"""兼容基线入口：真正实现位于 cso 包。
 
+可通过环境变量 DATA_DIR 指定落盘目录（事件链与状态快照），
+PORT/HOST 控制监听地址。
+"""
+from cso.service import SERVICE_NAME, create_server  # noqa: F401
 
-SERVICE_NAME = "drainage-service-starter"
-
-
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):  # noqa: N802
-        if self.path == "/health":
-            payload = json.dumps({"status": "ok", "service": SERVICE_NAME}).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Length", str(len(payload)))
-            self.end_headers()
-            self.wfile.write(payload)
-            return
-        payload = b'{"error":"not_found"}'
-        self.send_response(404)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(payload)))
-        self.end_headers()
-        self.wfile.write(payload)
-
-    def log_message(self, *_args):
-        return
-
-
-def create_server():
-    port = int(os.environ.get("PORT", "8000"))
-    host = os.environ.get("HOST", "0.0.0.0")
-    return ThreadingHTTPServer((host, port), Handler)
+__all__ = ["SERVICE_NAME", "create_server"]
